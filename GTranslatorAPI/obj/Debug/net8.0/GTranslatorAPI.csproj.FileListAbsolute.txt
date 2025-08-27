@@ -23,3 +23,16 @@ D:\Projects\DilangramProject\GTranslatorAPI\obj\Debug\net8.0\GTranslatorAPI.dll
 D:\Projects\DilangramProject\GTranslatorAPI\obj\Debug\net8.0\refint\GTranslatorAPI.dll
 D:\Projects\DilangramProject\GTranslatorAPI\obj\Debug\net8.0\GTranslatorAPI.pdb
 D:\Projects\DilangramProject\GTranslatorAPI\obj\Debug\net8.0\ref\GTranslatorAPI.dll
+D:\Git\Dilangram\GTranslatorAPI\bin\Debug\net8.0\GTranslatorAPI.deps.json
+D:\Git\Dilangram\GTranslatorAPI\bin\Debug\net8.0\GTranslatorAPI.dll
+D:\Git\Dilangram\GTranslatorAPI\bin\Debug\net8.0\GTranslatorAPI.pdb
+D:\Git\Dilangram\GTranslatorAPI\obj\Debug\net8.0\GTranslatorAPI.csproj.AssemblyReference.cache
+D:\Git\Dilangram\GTranslatorAPI\obj\Debug\net8.0\GTranslatorAPI.GeneratedMSBuildEditorConfig.editorconfig
+D:\Git\Dilangram\GTranslatorAPI\obj\Debug\net8.0\GTranslatorAPI.AssemblyInfoInputs.cache
+D:\Git\Dilangram\GTranslatorAPI\obj\Debug\net8.0\GTranslatorAPI.AssemblyInfo.cs
+D:\Git\Dilangram\GTranslatorAPI\obj\Debug\net8.0\GTranslatorAPI.csproj.CoreCompileInputs.cache
+D:\Git\Dilangram\GTranslatorAPI\obj\Debug\net8.0\GTranslatorAPI.sourcelink.json
+D:\Git\Dilangram\GTranslatorAPI\obj\Debug\net8.0\GTranslatorAPI.dll
+D:\Git\Dilangram\GTranslatorAPI\obj\Debug\net8.0\refint\GTranslatorAPI.dll
+D:\Git\Dilangram\GTranslatorAPI\obj\Debug\net8.0\GTranslatorAPI.pdb
+D:\Git\Dilangram\GTranslatorAPI\obj\Debug\net8.0\ref\GTranslatorAPI.dll

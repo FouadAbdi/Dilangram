@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyDescriptionAttribute("Google Translate API Client C#")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("2.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("2.0.0+7577e334a346282247d1180337aba69f4af2462e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("2.0.0+9078d7aed18ff850a58ce823a79c0529b0bac422")]
 [assembly: System.Reflection.AssemblyProductAttribute("GTranslatorAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GTranslatorAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("2.0.0.0")]

@@ -17,16 +17,85 @@ namespace DilangramCore
 {
     public partial class MainForm : Form
     {
-
-        public static Client tgClient;
+        public static Client? tgClient;
+        private User? currentUser;
+        private bool isConnected = false;
 
         public MainForm()
         {
             InitializeComponent();
-
-            this.Enabled = false;
-
             WTelegram.Helpers.Log = (l, s) => Debug.WriteLine(s);
+            InitializeUI();
+        }
+
+        private void InitializeUI()
+        {
+            // Initially disable buttons until connected
+            btnChannels.Enabled = false;
+            btnSendMessage.Enabled = false;
+            btnJobs.Enabled = false;
+            btnRefresh.Enabled = false;
+            
+            // Setup initial status
+            UpdateConnectionStatus(false);
+            LogMessage("🚀 Dilangram started. Ready to connect to Telegram.");
+        }
+
+        private void LogMessage(string message)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action<string>(LogMessage), message);
+                return;
+            }
+            
+            string timestamp = DateTime.Now.ToString("HH:mm:ss");
+            string logEntry = $"[{timestamp}] {message}";
+            
+            if (txtLog.Text.Length > 0)
+                txtLog.AppendText(Environment.NewLine + logEntry);
+            else
+                txtLog.Text = logEntry;
+                
+            txtLog.SelectionStart = txtLog.Text.Length;
+            txtLog.ScrollToCaret();
+            
+            // Update status bar
+            statusLabel.Text = message.Replace("🚀", "").Replace("✅", "").Replace("❌", "").Replace("🔌", "").Trim();
+        }
+
+        private void UpdateConnectionStatus(bool connected)
+        {
+            isConnected = connected;
+            
+            if (connected)
+            {
+                lblConnectionStatus.Text = "🟢 Connected";
+                lblConnectionStatus.ForeColor = Color.LightGreen;
+                btnConnect.Text = "🔌 Disconnect";
+                btnConnect.BackColor = Color.FromArgb(240, 71, 71);
+                
+                // Enable other buttons
+                btnChannels.Enabled = true;
+                btnSendMessage.Enabled = true;
+                btnJobs.Enabled = true;
+                btnRefresh.Enabled = true;
+            }
+            else
+            {
+                lblConnectionStatus.Text = "🔴 Disconnected";
+                lblConnectionStatus.ForeColor = Color.LightCoral;
+                btnConnect.Text = "🔌 Connect to Telegram";
+                btnConnect.BackColor = Color.FromArgb(67, 181, 129);
+                
+                // Disable other buttons
+                btnChannels.Enabled = false;
+                btnSendMessage.Enabled = false;
+                btnJobs.Enabled = false;
+                btnRefresh.Enabled = false;
+                
+                lblUserInfo.Text = "Not logged in";
+            }
         }
 
         static string Config(string what)
@@ -60,83 +129,199 @@ namespace DilangramCore
             }
         }
 
+        private async void btnConnect_Click(object sender, EventArgs e)
+        {
+            if (!isConnected)
+            {
+                await ConnectToTelegram();
+            }
+            else
+            {
+                DisconnectFromTelegram();
+            }
+        }
 
+        private async Task ConnectToTelegram()
+        {
+            try
+            {
+                LogMessage("🔌 Connecting to Telegram...");
+                btnConnect.Enabled = false;
+                
+                tgClient = new WTelegram.Client(Config);
+                var user = await tgClient.LoginUserIfNeeded();
+                
+                if (user != null)
+                {
+                    currentUser = user;
+                    LogMessage($"✅ Successfully connected as: {user.first_name} {user.last_name}");
+                    lblUserInfo.Text = $"👤 {user.first_name} {user.last_name}";
+                    
+                    UpdateConnectionStatus(true);
+                    
+                    // Load user profile details
+                    await LoadUserProfile();
+                    
+                    // Update UI with chat data
+                    UpdateUi();
+                    
+                    // Start listening for messages
+                    await ListenMessages();
+                }
+                else
+                {
+                    LogMessage("❌ Failed to connect to Telegram");
+                    UpdateConnectionStatus(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Connection error: {ex.Message}");
+                UpdateConnectionStatus(false);
+            }
+            finally
+            {
+                btnConnect.Enabled = true;
+            }
+        }
+
+        private void DisconnectFromTelegram()
+        {
+            try
+            {
+                LogMessage("🔌 Disconnecting from Telegram...");
+                
+                tgClient?.Dispose();
+                tgClient = null;
+                currentUser = null;
+                
+                UpdateConnectionStatus(false);
+                LogMessage("✅ Disconnected from Telegram");
+                
+                // Clear UI data
+                lstChats.Items.Clear();
+                lstApplicationJobs.Items.Clear();
+                txtCodeGenerator.Clear();
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Disconnect error: {ex.Message}");
+            }
+        }
+
+        private async Task LoadUserProfile()
+        {
+            try
+            {
+                LogMessage("📄 Loading user profile...");
+                
+                var users = await tgClient.Users_GetUsers(InputUser.Self);
+                var loggedInUser = users[0] as User;
+                
+                if (loggedInUser != null)
+                {
+                    LogMessage($"📄 Profile loaded: ID {loggedInUser.id}, Username: @{loggedInUser.username ?? "N/A"}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error loading profile: {ex.Message}");
+            }
+        }
+
+        private void btnChannels_Click(object sender, EventArgs e)
+        {
+            if (!isConnected)
+            {
+                MessageBox.Show("Please connect to Telegram first!", "Not Connected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            
+            LogMessage("📺 Opening Channel Management...");
+            // Switch to chats tab
+            tabControl.SelectedTab = tabChats;
+        }
+
+        private void btnJobs_Click(object sender, EventArgs e)
+        {
+            if (!isConnected)
+            {
+                MessageBox.Show("Please connect to Telegram first!", "Not Connected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            
+            LogMessage("📋 Opening Job Management...");
+            // Switch to jobs tab
+            tabControl.SelectedTab = tabJobs;
+        }
 
         private async void MainForm_Load(object sender, EventArgs e)
         {
-            tgClient = new WTelegram.Client(Config);
-
-            var user = await tgClient.LoginUserIfNeeded();
-
-            //Load Profile
-            var users = await tgClient.Users_GetUsers(InputUser.Self);
-            var logedInUser = users[0] as User;
-
-            grpUserInfo.Text = $"{logedInUser.first_name} {logedInUser.last_name} ";
-
-            Log($"Welcome {logedInUser.first_name} {logedInUser.last_name}");
-
-            UpdateUi();
-
-            this.Enabled = true;
-
-            await ListenMessages();
+            LogMessage("🚀 Application loaded successfully");
+            LogMessage("ℹ️  Click 'Connect to Telegram' to start using the application");
         }
 
         #region Logger
         public void Log(string log)
         {
             Program.Log(log);
-
-            txtLog.Text = string.Join(Environment.NewLine, Program.logs);
+            LogMessage(log);
         }
         #endregion
 
         public async void UpdateUi()
         {
-            //Load Chat List
-            Program.ChatList = await tgClient.Messages_GetAllChats();
-
-            lstChats.Items.Clear();
-
-            foreach (var (id, chat) in Program.ChatList.chats)
+            if (!isConnected || tgClient == null) return;
+            
+            try
             {
-                switch (chat)
+                LogMessage("🔄 Updating UI data...");
+                
+                //Load Chat List
+                Program.ChatList = await tgClient.Messages_GetAllChats();
+
+                lstChats.Items.Clear();
+
+                foreach (var (id, chat) in Program.ChatList.chats)
                 {
-                    case Chat smallgroup when (smallgroup.flags) != 0 && chat.IsActive:
-
-                        lstChats.Items.Add($"{id}:  Sgroup: {smallgroup.title} {smallgroup.participants_count} members");
-                        break;
-                    case Channel channel when (channel.flags & Channel.Flags.broadcast) != 0 && chat.IsActive:
-                        lstChats.Items.Add($"{id}: Channel {channel.username}: {channel.title}");
-                        break;
-                    case Channel group when chat.IsActive:
-                        lstChats.Items.Add($"{id}: Group {group.username}: {group.title}");
-                        break;
+                    switch (chat)
+                    {
+                        case Chat smallgroup when (smallgroup.flags) != 0 && chat.IsActive:
+                            lstChats.Items.Add($"{id}:  Sgroup: {smallgroup.title} {smallgroup.participants_count} members");
+                            break;
+                        case Channel channel when (channel.flags & Channel.Flags.broadcast) != 0 && chat.IsActive:
+                            lstChats.Items.Add($"{id}: Channel {channel.username}: {channel.title}");
+                            break;
+                        case Channel group when chat.IsActive:
+                            lstChats.Items.Add($"{id}: Group {group.username}: {group.title}");
+                            break;
+                    }
                 }
+
+                if (lstChats.Items.Count > 0)
+                    lstChats.SelectedIndex = 0;
+
+                //Load AppJobs
+                AppJobHelper.LoadJobs();
+                UpdateAppJobs();
+                
+                LogMessage($"✅ UI updated - {lstChats.Items.Count} chats, {lstApplicationJobs.Items.Count} jobs");
             }
-
-            if (lstChats.Items.Count > 0)
-                lstChats.SelectedIndex = 0;
-
-
-            //Load AppJobs
-            AppJobHelper.LoadJobs();
-
-            UpdateAppJobs();
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error updating UI: {ex.Message}");
+            }
         }
+        
         private void UpdateAppJobs()
         {
             lstApplicationJobs.Items.Clear();
             foreach (ChannelJob job in Program.AppJobs)
             {
                 job.ChatPeer = Program.GetInputPeerForChatId(job.ChatId);
-
                 lstApplicationJobs.Items.Add($"{job.ChatId}: {job.Title}  {(job.UserName.Length > 2 ? "(@" + job.UserName + ")" : string.Empty)}");
             }
         }
-
-
 
         #region Utility
 
@@ -183,15 +368,11 @@ namespace DilangramCore
 
         #endregion
 
-
-
-
         #region ListenMessages
         private static long lastMediAGroupId = -1;
         private async Task ListenMessages()
         {
-            Log("Listening.....");
-
+            LogMessage("👂 Starting message listener...");
             tgClient.OnUpdate += Client_OnUpdate;
         }
 
@@ -213,15 +394,12 @@ namespace DilangramCore
                         {
                             TL.Message msg = ((TL.Message)uncm.message);
 
-
                             if (msg.reply_markup == null)
                             {
                                 long chatId = ((TL.PeerChannel)msg.Peer).ID;
 
                                 //ToDo : Custom Parse Here
                                 //CustomMessageParser.Parse(chatId,msg.message.ToString());
-
-
 
                                 //Handle All Jobs
                                 var jobs = AppJobHelper.GetJobsForChannel(uncm.message.Peer.ID);
@@ -295,7 +473,6 @@ namespace DilangramCore
                                     }
                                     #endregion
 
-
                                     string text = msg.message.ToString();
 
                                     Debug.WriteLine(text);
@@ -319,7 +496,6 @@ namespace DilangramCore
                                         }
                                     }
 
-
                                     //Remove Text
                                     if (currentChannel.RemoveText)
                                     {
@@ -327,7 +503,6 @@ namespace DilangramCore
                                     }
                                     else
                                     {
-
                                         if (currentChannel.DeletePostsWithForeignMentions)
                                         {
                                             string st = Regex.Replace(text, "@" + currentChannel.UserName, "@" + job.UserName, RegexOptions.IgnoreCase);
@@ -338,7 +513,6 @@ namespace DilangramCore
                                             }
                                         }
 
-
                                         //Remove All Links
                                         if (currentChannel.RemoveAllLinkInCaption)
                                         {
@@ -348,8 +522,6 @@ namespace DilangramCore
                                             // Use Regex.Replace to remove the matched links
                                             text = Regex.Replace(text, pattern, string.Empty);
                                         }
-
-
 
                                         //Implement Auto Translate text Variable
                                         //ToDo : implement user select language in source setting
@@ -363,10 +535,8 @@ namespace DilangramCore
 
                                                 textToTranslate = text.Replace("\n", "#$#");
 
-
                                                 //ToDo : implement reTranslate text if res.TranslatedText equal empty
                                                 Translation res = await translator.TranslateAsync(Languages.auto, Languages.ckb, text);
-
 
                                                 bool hasErrorInTranslate = false;
                                                 if (res != null)
@@ -389,10 +559,8 @@ namespace DilangramCore
                                                 {
                                                     text = "Error In Translate : \n\n" + text;
                                                 }
-
                                             }
                                         }
-
 
                                         if (currentChannel.SpamWords is not null)
                                         {
@@ -413,8 +581,6 @@ namespace DilangramCore
                                             }
                                         }
 
-
-
                                         switch (currentChannel.MentionPolicy)
                                         {
                                             case SourceChannelMentions.RemoveAllMentions:
@@ -433,7 +599,6 @@ namespace DilangramCore
                                             {
                                                 text = string.Join("\r\n", lines.Skip(1).ToArray());
                                             }
-
                                         }
 
                                         if (currentChannel.RemoveLastLine)
@@ -445,7 +610,6 @@ namespace DilangramCore
                                             }
                                         }
 
-
                                         //Clean Custom Word's
                                         if (currentChannel.CleanCustomWords is not null)
                                         {
@@ -455,26 +619,12 @@ namespace DilangramCore
                                             }
                                         }
 
-
-
-                                        ////automatically replace all consecutive empty lines (regardless of how many there are) with just one empty line
-                                        //{
-                                        //    // Define the regex pattern to match one or more empty lines
-                                        //    string extraNewLinePatternRegex = @"(\r?\n)+";
-
-                                        //    // Replace all consecutive empty lines with a single empty line
-                                        //    text = Regex.Replace(text, extraNewLinePatternRegex, Environment.NewLine);
-                                        //}
-
-
-
                                         //Append And Prepend Text
                                         if (currentChannel.PrependText is not null)
                                             text = currentChannel.PrependText + text;
                                         if (currentChannel.AppendText is not null)
                                             text += currentChannel.AppendText;
                                     }
-
 
                                     //Check if that album
                                     if (msg.grouped_id == 0)
@@ -496,66 +646,72 @@ namespace DilangramCore
                                             lastMediAGroupId = msg.grouped_id;
                                             InputPeer fromChat = Program.GetInputPeerForChatId(currentChannel.ChannelId);
 
-
                                             // Fetch the album messages from the source channel
                                             var history = await tgClient.Messages_GetHistory(fromChat);
 
                                             var albumMessages = history.Messages
                                                 .OfType<TL.Message>()
-                                                .Where(m => m.grouped_id != null && m.grouped_id== lastMediAGroupId) // Filter for grouped messages (albums)
+                                                .Where(m => m.grouped_id != null && m.grouped_id == lastMediAGroupId) // Filter for grouped messages (albums)
                                                 .ToList();
 
                                             // Extract message IDs of the album
                                             int[] messageIds = albumMessages.Select(m => ((int)m.id)).ToArray();
 
-                                            
                                             if (messageIds.Length > 0)
                                             {
-
                                                 List<InputMedia> albumGroupMedia = albumMessages
                                                     .Select(m => m.media.ToInputMedia())
                                                     .ToList();
 
                                                 await tgClient.SendAlbumAsync(peer: job.ChatPeer, medias: albumGroupMedia, caption: text);
                                             }
-
                                         }
                                     }
                                     Log($"{job.Title} has send message from {currentChannel.UserName}");
                                 }
-
                             }
                             break;
-
                         }
                 }
             }
         }
 
-
         #endregion
-
-
-
 
         private void btnRefresh_Click(object sender, EventArgs e)
         {
+            LogMessage("🔄 Refreshing data...");
             UpdateUi();
         }
 
         private void frmMain_FormClosed(object sender, FormClosedEventArgs e)
         {
+            LogMessage("🔄 Shutting down...");
             tgClient?.Dispose();
         }
 
         private void btnAddJob_Click(object sender, EventArgs e)
         {
+            if (!isConnected)
+            {
+                MessageBox.Show("Please connect to Telegram first!", "Not Connected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            
+            LogMessage("➕ Opening job editor...");
             new frmJobEditor().ShowDialog();
             UpdateAppJobs();
         }
 
         private void btnSendMessage_Click(object sender, EventArgs e)
         {
+            if (!isConnected)
+            {
+                MessageBox.Show("Please connect to Telegram first!", "Not Connected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            
+            LogMessage("� Opening chat cloner...");
             new frmSendMessages().ShowDialog();
         }
 
@@ -568,40 +724,38 @@ namespace DilangramCore
 
             ChannelJob job = AppJobHelper.GetJobByChannlId(jobId);
 
+            LogMessage($"📝 Editing job: {job.Title}");
             frmJobEditor jobEditor = new frmJobEditor(job);
             jobEditor.ShowDialog();
 
             UpdateAppJobs();
         }
 
-        private void lstChats_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void lstChats_SelectedIndexChanged_1(object sender, EventArgs e)
         {
+            if (lstChats.SelectedItem == null) return;
+            
             string[] splited = lstChats.SelectedItem.ToString().Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
-            string chanellId = splited[0].Trim();
+            string channelId = splited[0].Trim();
 
-            txtCodeGenerator.Text = "// Sniff Channel : " + splited[1] + Environment.NewLine + @"if(uncm.message.Peer.ID==" + chanellId + ")" + Environment.NewLine + "{" + Environment.NewLine + Environment.NewLine + "}";
+            txtCodeGenerator.Text = "// Sniff Channel : " + splited[1] + Environment.NewLine + @"if(uncm.message.Peer.ID==" + channelId + ")" + Environment.NewLine + "{" + Environment.NewLine + Environment.NewLine + "}";
+            
+            LogMessage($"📺 Selected chat: {splited[1].Trim()}");
         }
 
         private void btnLockApplication_Click(object sender, EventArgs e)
         {
+            LogMessage("🔒 Locking application...");
             this.Hide();
 
             frmUnlock unlock = new frmUnlock();
             unlock.ShowDialog();
+            
+            if (unlock.DialogResult == DialogResult.OK)
+            {
+                this.Show();
+                LogMessage("🔓 Application unlocked");
+            }
         }
-
-        private void grpChatDetail_Enter(object sender, EventArgs e)
-        {
-
-        }
-
-
-
-
     }
 }
