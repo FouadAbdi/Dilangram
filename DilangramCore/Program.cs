@@ -1,4 +1,5 @@
 ﻿using DilangramCore;
+using DilangramCore.Config;
 using DilangramCore.Model;
 using TL;
 
@@ -10,8 +11,9 @@ namespace Dilangram
         public static MainForm mainForm;
         public static string InputTextDialog { get; internal set; }
 
-        internal static int api_id = 0000000;
-        internal static string api_hash = "00000000000000000000000000000";
+        // Load API credentials from configuration file
+        internal static int api_id => AppConfig.ApiId;
+        internal static string api_hash => AppConfig.ApiHash;
 
         public static List<ChannelJob> AppJobs = new List<ChannelJob>();
 
@@ -52,6 +54,9 @@ namespace Dilangram
         [STAThread]
         static void Main()
         {
+            // Ensure configuration file exists
+            AppConfig.CreateConfigFile();
+            
             ApplicationConfiguration.Initialize();
 
             mainForm= new MainForm();

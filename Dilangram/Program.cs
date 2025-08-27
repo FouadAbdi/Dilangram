@@ -1,4 +1,5 @@
 ﻿using ChannelSniffer.Model;
+using Dilangram.Config;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +12,10 @@ namespace Dilangram
     internal static class Program
     {
         public static string InputTextDialog { get; internal set; }
-        internal static int api_id = 20833282;
-        internal static string api_hash = "6d4517a3e6c32f17e5ac2efe026039e2";
+        
+        // Load API credentials from configuration file
+        internal static int api_id => AppConfig.ApiId;
+        internal static string api_hash => AppConfig.ApiHash;
 
         public static List<ChannelJob> AppJobs = new List<ChannelJob>();
 
@@ -53,6 +56,9 @@ namespace Dilangram
         [STAThread]
         static void Main()
         {
+            // Ensure configuration file exists
+            AppConfig.CreateConfigFile();
+            
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
