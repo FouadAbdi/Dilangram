@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup Label="Globals">
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WTelegramClient" Version="3.7.1" />
+    <PackageReference Include="WTelegramClient.Extensions.Updates" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GTranslatorAPI\GTranslatorAPI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Dialog\frmChatSelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dialog\frmInputTextbox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\frmContentChannel.cs" />
+    <Compile Update="Forms\frmJobEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\frmSendMessages.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+
+</Project>

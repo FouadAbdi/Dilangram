@@ -1,0 +1,6 @@
+ string texxxt=textBox1.Text;
+
+var translator = new Translator();
+var result = await translator.TranslateAsync(Languages.auto, Languages.ckb, texxxt);
+
+MessageBox.Show(result.TranslatedText);

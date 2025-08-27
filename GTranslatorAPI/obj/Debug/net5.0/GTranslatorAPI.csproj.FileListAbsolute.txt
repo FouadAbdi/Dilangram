@@ -1,0 +1,13 @@
+C:\Users\HP\GTranslatorAPI\GTranslatorAPI\bin\Debug\net5.0\GTranslatorAPI.deps.json
+C:\Users\HP\GTranslatorAPI\GTranslatorAPI\bin\Debug\net5.0\GTranslatorAPI.dll
+C:\Users\HP\GTranslatorAPI\GTranslatorAPI\bin\Debug\net5.0\GTranslatorAPI.pdb
+C:\Users\HP\GTranslatorAPI\GTranslatorAPI\obj\Debug\net5.0\GTranslatorAPI.csproj.AssemblyReference.cache
+C:\Users\HP\GTranslatorAPI\GTranslatorAPI\obj\Debug\net5.0\GTranslatorAPI.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\HP\GTranslatorAPI\GTranslatorAPI\obj\Debug\net5.0\GTranslatorAPI.AssemblyInfoInputs.cache
+C:\Users\HP\GTranslatorAPI\GTranslatorAPI\obj\Debug\net5.0\GTranslatorAPI.AssemblyInfo.cs
+C:\Users\HP\GTranslatorAPI\GTranslatorAPI\obj\Debug\net5.0\GTranslatorAPI.csproj.CoreCompileInputs.cache
+C:\Users\HP\GTranslatorAPI\GTranslatorAPI\obj\Debug\net5.0\GTranslatorAPI.sourcelink.json
+C:\Users\HP\GTranslatorAPI\GTranslatorAPI\obj\Debug\net5.0\GTranslatorAPI.dll
+C:\Users\HP\GTranslatorAPI\GTranslatorAPI\obj\Debug\net5.0\refint\GTranslatorAPI.dll
+C:\Users\HP\GTranslatorAPI\GTranslatorAPI\obj\Debug\net5.0\GTranslatorAPI.pdb
+C:\Users\HP\GTranslatorAPI\GTranslatorAPI\obj\Debug\net5.0\ref\GTranslatorAPI.dll
