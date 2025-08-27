@@ -38,7 +38,26 @@ namespace Dilangram.Dialog
         private List<string> lstChatsItem = new List<string>();
         private void frmChatSelector_Load(object sender, EventArgs e)
         {
+            // Check if ChatList is available
+            if (Program.ChatList == null)
+            {
+                MessageBox.Show("Chat list is not available. Please ensure you are connected to Telegram first.", 
+                    "Chat List Not Available", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                this.DialogResult = DialogResult.Cancel;
+                this.Close();
+                return;
+            }
+
             var chats = Program.ChatList.chats;
+
+            if (chats == null)
+            {
+                MessageBox.Show("No chats found. Please refresh the chat list.", 
+                    "No Chats Found", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                this.DialogResult = DialogResult.Cancel;
+                this.Close();
+                return;
+            }
 
             foreach (var (id, chat) in chats)
             {
@@ -113,8 +132,20 @@ namespace Dilangram.Dialog
         {
             if (lstChats.SelectedItem is null) return;
 
-            ChatTitle = lstChats.SelectedItem.ToString();
-            ChatId = long.Parse(ChatTitle.Substring(0, ChatTitle.IndexOf(":")));
+            string selectedItem = lstChats.SelectedItem.ToString();
+            if (string.IsNullOrEmpty(selectedItem)) return;
+
+            ChatTitle = selectedItem;
+            
+            int colonIndex = ChatTitle.IndexOf(":");
+            if (colonIndex > 0)
+            {
+                string chatIdStr = ChatTitle.Substring(0, colonIndex);
+                if (long.TryParse(chatIdStr, out long parsedChatId))
+                {
+                    ChatId = parsedChatId;
+                }
+            }
         }
 
         private void lstChats_MouseDoubleClick(object sender, MouseEventArgs e)
